@@ -47,6 +47,7 @@ class HuaweiR4850Component : public PollingComponent {
 
  protected:
   canbus::Canbus *canbus;
+  uint32_t lastUpdate_;
 
   sensor::Sensor *input_voltage_sensor_{nullptr};
   sensor::Sensor *input_frequency_sensor_{nullptr};

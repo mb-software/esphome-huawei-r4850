@@ -27,10 +27,7 @@ static const uint8_t R48xx_DATA_INPUT_TEMPERATURE = 0x80;
 static const uint8_t R48xx_DATA_OUTPUT_CURRENT = 0x81;
 static const uint8_t R48xx_DATA_OUTPUT_CURRENT1 = 0x82;
 
-HuaweiR4850Component::HuaweiR4850Component(canbus::Canbus *canbus) {
-  ESP_LOGD(TAG, "Constructor called");
-  this->canbus = canbus;
-}
+HuaweiR4850Component::HuaweiR4850Component(canbus::Canbus *canbus) { this->canbus = canbus; }
 
 void HuaweiR4850Component::setup() {
   Automation<std::vector<uint8_t>, uint32_t, bool> *automation;
@@ -52,6 +49,21 @@ void HuaweiR4850Component::update() {
   ESP_LOGD(TAG, "Sending request message");
   std::vector<uint8_t> data = {0, 0, 0, 0, 0, 0, 0, 0};
   this->canbus->send_data(CAN_ID_REQUEST, true, data);
+
+  // no new value for 5* intervall -> set sensors to NAN)
+  if (millis() - lastUpdate_ > this->update_interval_ * 5) {
+    this->publish_sensor_state_(this->input_power_sensor_, NAN);
+    this->publish_sensor_state_(this->input_voltage_sensor_, NAN);
+    this->publish_sensor_state_(this->input_current_sensor_, NAN);
+    this->publish_sensor_state_(this->input_temp_sensor_, NAN);
+    this->publish_sensor_state_(this->input_frequency_sensor_, NAN);
+    this->publish_sensor_state_(this->output_power_sensor_, NAN);
+    this->publish_sensor_state_(this->output_current_sensor_, NAN);
+    this->publish_sensor_state_(this->output_voltage_sensor_, NAN);
+    this->publish_sensor_state_(this->output_temp_sensor_, NAN);
+    this->publish_sensor_state_(this->efficiency_sensor_, NAN);
+    this->publish_number_state_(this->max_output_current_number_, NAN);
+  }
 }
 
 void HuaweiR4850Component::set_output_voltage(float value, bool offline) {
@@ -91,61 +103,61 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
       case R48xx_DATA_INPUT_POWER:
         conv_value = value / 1024.0;
         this->publish_sensor_state_(this->input_power_sensor_, conv_value);
-        ESP_LOGD(TAG, "Input power: %f", conv_value);
+        ESP_LOGV(TAG, "Input power: %f", conv_value);
         break;
 
       case R48xx_DATA_INPUT_FREQ:
         conv_value = value / 1024.0;
         this->publish_sensor_state_(this->input_frequency_sensor_, conv_value);
-        ESP_LOGD(TAG, "Input frequency: %f", conv_value);
+        ESP_LOGV(TAG, "Input frequency: %f", conv_value);
         break;
 
       case R48xx_DATA_INPUT_CURRENT:
         conv_value = value / 1024.0;
         this->publish_sensor_state_(this->input_current_sensor_, conv_value);
-        ESP_LOGD(TAG, "Input current: %f", conv_value);
+        ESP_LOGV(TAG, "Input current: %f", conv_value);
         break;
 
       case R48xx_DATA_OUTPUT_POWER:
         conv_value = value / 1024.0;
         this->publish_sensor_state_(this->output_power_sensor_, conv_value);
-        ESP_LOGD(TAG, "Output power: %f", conv_value);
+        ESP_LOGV(TAG, "Output power: %f", conv_value);
         break;
 
       case R48xx_DATA_EFFICIENCY:
         conv_value = value / 1024.0;
         this->publish_sensor_state_(this->efficiency_sensor_, conv_value);
-        ESP_LOGD(TAG, "Efficiency: %f", conv_value);
+        ESP_LOGV(TAG, "Efficiency: %f", conv_value);
         break;
 
       case R48xx_DATA_OUTPUT_VOLTAGE:
         conv_value = value / 1024.0;
         this->publish_sensor_state_(this->output_voltage_sensor_, conv_value);
-        ESP_LOGD(TAG, "Output voltage: %f", conv_value);
+        ESP_LOGV(TAG, "Output voltage: %f", conv_value);
         break;
 
       case R48xx_DATA_OUTPUT_CURRENT_MAX:
         conv_value = value / 20.0;
         this->publish_number_state_(this->max_output_current_number_, conv_value);
-        ESP_LOGD(TAG, "Max Output current: %f", conv_value);
+        ESP_LOGV(TAG, "Max Output current: %f", conv_value);
         break;
 
       case R48xx_DATA_INPUT_VOLTAGE:
         conv_value = value / 1024.0;
         this->publish_sensor_state_(this->input_voltage_sensor_, conv_value);
-        ESP_LOGD(TAG, "Input voltage: %f", conv_value);
+        ESP_LOGV(TAG, "Input voltage: %f", conv_value);
         break;
 
       case R48xx_DATA_OUTPUT_TEMPERATURE:
         conv_value = value / 1024.0;
         this->publish_sensor_state_(this->output_temp_sensor_, conv_value);
-        ESP_LOGD(TAG, "Output temperature: %f", conv_value);
+        ESP_LOGV(TAG, "Output temperature: %f", conv_value);
         break;
 
       case R48xx_DATA_INPUT_TEMPERATURE:
         conv_value = value / 1024.0;
         this->publish_sensor_state_(this->input_temp_sensor_, conv_value);
-        ESP_LOGD(TAG, "Input temperature: %f", conv_value);
+        ESP_LOGV(TAG, "Input temperature: %f", conv_value);
         break;
 
       case R48xx_DATA_OUTPUT_CURRENT1:
@@ -156,7 +168,10 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
       case R48xx_DATA_OUTPUT_CURRENT:
         conv_value = value / 1024.0;
         this->publish_sensor_state_(this->output_current_sensor_, conv_value);
-        ESP_LOGD(TAG, "Output current: %f", conv_value);
+        ESP_LOGV(TAG, "Output current: %f", conv_value);
+
+        // this usually is the last message
+        this->lastUpdate_ = millis();
         break;
 
       default:
