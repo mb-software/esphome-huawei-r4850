@@ -125,7 +125,7 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
         break;
 
       case R48xx_DATA_EFFICIENCY:
-        conv_value = value / 1024.0;
+        conv_value = value / 1024.0 * 100;
         this->publish_sensor_state_(this->efficiency_sensor_, conv_value);
         ESP_LOGV(TAG, "Efficiency: %f", conv_value);
         break;

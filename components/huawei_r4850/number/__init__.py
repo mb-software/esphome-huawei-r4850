@@ -10,11 +10,11 @@ from esphome.const import (
     CONF_ENTITY_CATEGORY,
     ICON_FLASH,
     ICON_CURRENT_AC,
-    ENTITY_CATEGORY_CONFIG,
     CONF_MIN_VALUE,
     CONF_MAX_VALUE,
     CONF_STEP,
     UNIT_AMPERE,
+    ENTITY_CATEGORY_NONE,
 )
 
 from .. import HuaweiR4850Component, huawei_r4850_ns, CONF_HUAWEI_R4850_ID
@@ -46,7 +46,7 @@ CONFIG_SCHEMA = cv.All(
                         number.NUMBER_MODES, upper=True
                     ),
                     cv.Optional(
-                        CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_CONFIG
+                        CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_NONE
                     ): cv.entity_category,
                 }
             ),
@@ -64,7 +64,7 @@ CONFIG_SCHEMA = cv.All(
                         number.NUMBER_MODES, upper=True
                     ),
                     cv.Optional(
-                        CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_CONFIG
+                        CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_NONE
                     ): cv.entity_category,
                 }
             ),

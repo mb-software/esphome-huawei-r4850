@@ -18,7 +18,6 @@ from esphome.const import (
     ICON_PERCENT,
     ICON_THERMOMETER,
     ICON_CURRENT_AC,
-    ICON_POWER,
 )
 from . import HuaweiR4850Component, CONF_HUAWEI_R4850_ID
 
@@ -77,7 +76,7 @@ CONFIG_SCHEMA = cv.All(
             ),
             cv.Optional(CONF_INPUT_POWER): sensor.sensor_schema(
                 unit_of_measurement=UNIT_WATT,
-                icon=ICON_POWER,
+                icon=ICON_FLASH,
                 accuracy_decimals=1,
                 device_class=DEVICE_CLASS_POWER,
                 state_class=STATE_CLASS_MEASUREMENT,
@@ -118,7 +117,7 @@ CONFIG_SCHEMA = cv.All(
             # ),
             cv.Optional(CONF_OUTPUT_POWER): sensor.sensor_schema(
                 unit_of_measurement=UNIT_WATT,
-                icon=ICON_POWER,
+                icon=ICON_FLASH,
                 accuracy_decimals=1,
                 device_class=DEVICE_CLASS_POWER,
                 state_class=STATE_CLASS_MEASUREMENT,
