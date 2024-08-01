@@ -15,12 +15,12 @@ In theory it should work also with the mcp2515 platform, but this is currently n
 
 ## Basic usage
 Please check the provided example esphome configuration:
-[huawei_r4850.yaml](https://github.com/mb-software/esphome-huawei-r4850/blob/main/huawei_r4850.yaml)
+[huawei_r4850.yaml](huawei_r4850.yaml)
 
 ## Automatic excess charging
 
 For automatic excess charging based on a home assistant sensor ("total system power") please check out the following example:
-[huawei_r4850_excess_charging](main/huawei_r4850_excess_charging.yaml)
+[huawei_r4850_excess_charging](huawei_r4850_excess_charging.yaml)
 
 An additional 5V relay and a level shifter connected to a GPIO is required for this to work properly. The slot detection is being switched automatically depending on excess power and SOC. The charging current is being set depending on excess power and maximum allowed current (in this case 40 A).
 
