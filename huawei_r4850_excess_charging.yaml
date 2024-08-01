@@ -1,0 +1,158 @@
+esphome:
+  name: huawei_r4850
+  friendly_name: Huawei R4850 Charging Controller
+
+external_components:
+  - source: github://mb-software/esphome-huawei-r4850
+    refresh: 0s
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  level: DEBUG
+  logs:
+    canbus: INFO
+
+ota:
+  - platform: esphome
+    password: "..."
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "..."
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Huawei-R4850 Fallback Hotspot"
+    password: "..."
+
+captive_portal:
+    
+web_server:
+
+canbus:
+  - platform: esp32_can
+    id: can
+    tx_pin: GPIO14
+    rx_pin: GPIO27
+    use_extended_id: true
+    can_id: 0
+    bit_rate: 125kbps
+
+huawei_r4850:
+  canbus_id: can
+  update_interval: 5s
+
+sensor:
+  - platform: huawei_r4850
+    output_voltage:
+      name: Output Voltage
+      id: output_voltage
+    output_current:
+      name: Output Current
+      id: output_current
+    output_power:
+      name: Output Power
+      id: output_power
+    input_voltage:
+      name: Input Voltage
+      id: input_voltage
+    input_current:
+      name: Input Current
+      id: input_current
+    input_power:
+      name: Input Power
+      id: input_power
+    input_frequency:
+      name: Input Frequency
+    efficiency:
+      name: Efficiency
+    input_temp:
+      name: Input Temperature
+    output_temp:
+      name: Output Temperature
+  - platform: homeassistant
+    id: total_system_power
+    entity_id: sensor.total_system_power
+    internal: true
+
+number:
+  - platform: huawei_r4850
+    output_voltage:
+      name: Set Output Voltage
+      id: set_output_voltage
+    max_output_current:
+      name: Max Output Current
+      id: set_max_output_current
+
+button:
+  - platform: huawei_r4850
+    set_offline_values:
+      name: Set Offline Values
+
+# Relay connected to GPIO pin
+switch:
+  - platform: gpio
+    pin: GPIO13
+    id: slotdetect
+    name: "Charging Relay"
+    restore_mode: ALWAYS_OFF
+
+interval:
+  - interval: 5s
+    then:
+      - lambda: |-
+          float current_limit = 40.0;
+          float max_voltage = 58.0;
+          float stop_charging_voltage = 56.0; // ~= 88.9% SOC
+          float start_charging_voltage = 53.0; // ~= 72.7% SOC
+
+          // Retrieve sensor values
+          float voltage = id(output_voltage).state;
+          float current = id(output_current).state;
+          float excess_power = id(total_system_power).state;
+
+          ESP_LOGD("main", "Voltage: %.2f V", voltage);
+          ESP_LOGD("main", "Current: %.2f A", current);
+          ESP_LOGD("main", "Excess Power: %.2f W", excess_power);
+
+          // Safety check for excess power reading
+          if (isnan(excess_power) || excess_power > -500.0) {
+            ESP_LOGW("main", "Invalid excess power reading or system drawing more than 100W. Turning off charging.");
+            id(slotdetect).turn_off();
+            return;
+          }
+
+          // Calculate the maximum possible charging current based on available excess power
+          float max_possible_current = excess_power / voltage * -1;
+          ESP_LOGD("main", "Max Possible Current: %.2f A", max_possible_current);
+
+          // Ensure relay is on if voltage is below the start charging threshold
+          if (voltage < start_charging_voltage) {
+            ESP_LOGI("main", "Voltage below start charging threshold. Turning on relay.");
+            id(slotdetect).turn_on(); // Turn on the relay to start charging
+          }
+
+          // Set the charging current and voltage based on available excess power and battery limits
+          if (voltage < stop_charging_voltage) { // Ensure voltage is below max allowed during CC phase
+            float charging_current = min(max_possible_current, current_limit); // Limit to 40A
+            ESP_LOGD("main", "Setting charging current to %.2f A and voltage to %.2f V", charging_current, max_voltage);
+            id(set_max_output_current).control(charging_current);
+            id(set_output_voltage).control(max_voltage); // Set to max voltage for CV phase transition
+          } else {
+            // If voltage exceeds max voltage, stop charging
+            ESP_LOGI("main", "Voltage exceeds max voltage. Stopping charging.");
+            id(set_max_output_current).control(0.0);
+            id(set_output_voltage).control(0.0);
+            id(slotdetect).turn_off(); // Turn off the relay to stop charging
+            ESP_LOGD("main", "Charging complete.");
+          }
