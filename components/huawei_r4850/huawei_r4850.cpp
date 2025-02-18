@@ -70,7 +70,7 @@ void HuaweiR4850Component::set_output_voltage(float value, bool offline) {
   uint8_t functionCode = 0x0;
   if (offline)
     functionCode += 1;
-  int32_t raw = 1024.0 * value;
+  int32_t raw = 1024.0f * value;
   std::vector<uint8_t> data = {
       0x1, functionCode, 0x0, 0x0, (uint8_t) (raw >> 24), (uint8_t) (raw >> 16), (uint8_t) (raw >> 8), (uint8_t) raw};
   this->canbus->send_data(CAN_ID_SET, true, data);
@@ -80,7 +80,7 @@ void HuaweiR4850Component::set_max_output_current(float value, bool offline) {
   uint8_t functionCode = 0x3;
   if (offline)
     functionCode += 1;
-  int32_t raw = (value / this->psu_nominal_current_) * 1024.0;
+  int32_t raw = (value / this->psu_nominal_current_) * 1024.0f;
   std::vector<uint8_t> data = {
       0x1, functionCode, 0x0, 0x0, (uint8_t) (raw >> 24), (uint8_t) (raw >> 16), (uint8_t) (raw >> 8), (uint8_t) raw};
   this->canbus->send_data(CAN_ID_SET, true, data);
@@ -101,72 +101,72 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
     float conv_value = 0;
     switch (data[1]) {
       case R48xx_DATA_INPUT_POWER:
-        conv_value = value / 1024.0;
+        conv_value = value / 1024.0f;
         this->publish_sensor_state_(this->input_power_sensor_, conv_value);
         ESP_LOGV(TAG, "Input power: %f", conv_value);
         break;
 
       case R48xx_DATA_INPUT_FREQ:
-        conv_value = value / 1024.0;
+        conv_value = value / 1024.0f;
         this->publish_sensor_state_(this->input_frequency_sensor_, conv_value);
         ESP_LOGV(TAG, "Input frequency: %f", conv_value);
         break;
 
       case R48xx_DATA_INPUT_CURRENT:
-        conv_value = value / 1024.0;
+        conv_value = value / 1024.0f;
         this->publish_sensor_state_(this->input_current_sensor_, conv_value);
         ESP_LOGV(TAG, "Input current: %f", conv_value);
         break;
 
       case R48xx_DATA_OUTPUT_POWER:
-        conv_value = value / 1024.0;
+        conv_value = value / 1024.0f;
         this->publish_sensor_state_(this->output_power_sensor_, conv_value);
         ESP_LOGV(TAG, "Output power: %f", conv_value);
         break;
 
       case R48xx_DATA_EFFICIENCY:
-        conv_value = value / 1024.0 * 100;
+        conv_value = value / 1024.0f * 100.0f;
         this->publish_sensor_state_(this->efficiency_sensor_, conv_value);
         ESP_LOGV(TAG, "Efficiency: %f", conv_value);
         break;
 
       case R48xx_DATA_OUTPUT_VOLTAGE:
-        conv_value = value / 1024.0;
+        conv_value = value / 1024.0f;
         this->publish_sensor_state_(this->output_voltage_sensor_, conv_value);
         ESP_LOGV(TAG, "Output voltage: %f", conv_value);
         break;
 
       case R48xx_DATA_OUTPUT_CURRENT_MAX:
-        conv_value = value / 1024.0 * this->psu_nominal_current_;
+        conv_value = value / 1024.0f * this->psu_nominal_current_;
         this->publish_number_state_(this->max_output_current_number_, conv_value);
         ESP_LOGV(TAG, "Max Output current: %f", conv_value);
         break;
 
       case R48xx_DATA_INPUT_VOLTAGE:
-        conv_value = value / 1024.0;
+        conv_value = value / 1024.0f;
         this->publish_sensor_state_(this->input_voltage_sensor_, conv_value);
         ESP_LOGV(TAG, "Input voltage: %f", conv_value);
         break;
 
       case R48xx_DATA_OUTPUT_TEMPERATURE:
-        conv_value = value / 1024.0;
+        conv_value = value / 1024.0f;
         this->publish_sensor_state_(this->output_temp_sensor_, conv_value);
         ESP_LOGV(TAG, "Output temperature: %f", conv_value);
         break;
 
       case R48xx_DATA_INPUT_TEMPERATURE:
-        conv_value = value / 1024.0;
+        conv_value = value / 1024.0f;
         this->publish_sensor_state_(this->input_temp_sensor_, conv_value);
         ESP_LOGV(TAG, "Input temperature: %f", conv_value);
         break;
 
       case R48xx_DATA_OUTPUT_CURRENT1:
-        // printf("Output Current(1) %.02fA\r\n", value / 1024.0);
-        // output_current = value / 1024.0;
+        // printf("Output Current(1) %.02fA\r\n", value / 1024.0f);
+        // output_current = value / 1024.0f;
         break;
 
       case R48xx_DATA_OUTPUT_CURRENT:
-        conv_value = value / 1024.0;
+        conv_value = value / 1024.0f;
         this->publish_sensor_state_(this->output_current_sensor_, conv_value);
         ESP_LOGV(TAG, "Output current: %f", conv_value);
 
