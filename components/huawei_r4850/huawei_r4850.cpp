@@ -137,7 +137,7 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
         break;
 
       case R48xx_DATA_OUTPUT_CURRENT_MAX:
-        conv_value = value / 1024.0f * this->psu_nominal_current_;
+        conv_value = std::round((value / 1024.0f * this->psu_nominal_current_) * 10.0f) / 10.0f;
         this->publish_number_state_(this->max_output_current_number_, conv_value);
         ESP_LOGV(TAG, "Max Output current: %f", conv_value);
         break;
