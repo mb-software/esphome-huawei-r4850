@@ -97,7 +97,7 @@ void HuaweiR4850Component::set_offline_values() {
 
 void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8_t> &data) {
   if (can_id == CAN_ID_DATA) {
-    uint32_t value = (data[4] << 24) + (data[5] << 16) + (data[6] << 8) + data[7];
+    int32_t value = (data[4] << 24) + (data[5] << 16) + (data[6] << 8) + data[7];
     float conv_value = 0;
     switch (data[1]) {
       case R48xx_DATA_INPUT_POWER:
