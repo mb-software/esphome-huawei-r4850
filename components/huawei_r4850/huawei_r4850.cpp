@@ -80,7 +80,7 @@ void HuaweiR4850Component::set_max_output_current(float value, bool offline) {
   uint8_t functionCode = 0x3;
   if (offline)
     functionCode += 1;
-  int32_t raw = 20.0 * value;
+  int32_t raw = (value / this->psu_nominal_current_) * 1024.0;
   std::vector<uint8_t> data = {
       0x1, functionCode, 0x0, 0x0, (uint8_t) (raw >> 24), (uint8_t) (raw >> 16), (uint8_t) (raw >> 8), (uint8_t) raw};
   this->canbus->send_data(CAN_ID_SET, true, data);
@@ -137,7 +137,7 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
         break;
 
       case R48xx_DATA_OUTPUT_CURRENT_MAX:
-        conv_value = value / 20.0;
+        conv_value = value / 1024.0 * this->psu_nominal_current_;
         this->publish_number_state_(this->max_output_current_number_, conv_value);
         ESP_LOGV(TAG, "Max Output current: %f", conv_value);
         break;
