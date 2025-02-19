@@ -63,36 +63,18 @@ void HuaweiR4850Component::update() {
     this->publish_sensor_state_(this->output_voltage_sensor_, NAN);
     this->publish_sensor_state_(this->output_temp_sensor_, NAN);
     this->publish_sensor_state_(this->efficiency_sensor_, NAN);
-    this->publish_number_state_(this->max_output_current_number_, NAN);
   }
 }
 
-void HuaweiR4850Component::set_output_voltage(float value, bool offline) {
-  uint8_t functionCode = 0x0;
-  if (offline)
-    functionCode += 1;
-  int32_t raw = 1024.0f * value;
+void HuaweiR4850Component::set_value(uint8_t function_code, bool bit, int32_t raw) {
   std::vector<uint8_t> data = {
-      0x1, functionCode, 0x0, 0x0, (uint8_t) (raw >> 24), (uint8_t) (raw >> 16), (uint8_t) (raw >> 8), (uint8_t) raw};
-  this->canbus->send_data(CAN_ID_SET, true, data);
-}
-
-void HuaweiR4850Component::set_max_output_current(float value, bool offline) {
-  uint8_t functionCode = 0x3;
-  if (offline)
-    functionCode += 1;
-  int32_t raw = (value / this->psu_nominal_current_) * 1024.0f;
-  std::vector<uint8_t> data = {
-      0x1, functionCode, 0x0, 0x0, (uint8_t) (raw >> 24), (uint8_t) (raw >> 16), (uint8_t) (raw >> 8), (uint8_t) raw};
+      0x1, function_code, 0x0, bit, (uint8_t) (raw >> 24), (uint8_t) (raw >> 16), (uint8_t) (raw >> 8), (uint8_t) raw};
   this->canbus->send_data(CAN_ID_SET, true, data);
 }
 
 void HuaweiR4850Component::set_offline_values() {
-  if (output_voltage_number_) {
-    set_output_voltage(output_voltage_number_->state, true);
-  };
-  if (max_output_current_number_) {
-    set_max_output_current(max_output_current_number_->state, true);
+  for (auto &input : this->registered_inputs_) {
+    input->set_offline();
   }
 }
 
@@ -138,8 +120,11 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
         break;
 
       case R48xx_DATA_OUTPUT_CURRENT_MAX:
-        conv_value = std::round((value / 1024.0f * this->psu_nominal_current_) * 10.0f) / 10.0f;
-        this->publish_number_state_(this->max_output_current_number_, conv_value);
+        // special case: this is the only value (as of now) that both
+        // can be set and is also included in status message.
+        for (auto &input : this->registered_inputs_) {
+          input->handle_update(true, 0x3, false, value);
+        }
         ESP_LOGV(TAG, "Max Output current: %f", conv_value);
         break;
 
@@ -181,11 +166,17 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
     }
   } else if (can_id == CAN_ID_SET_ACK) {
     if(data[0] == 0x01) {
-      ESP_LOGD(TAG, "Value set OK: %02x %02x %02x %02x %02x %02x %02x", data[1] data[2] data[3] data[4] data[5] data[6] data[7]);
+      for (auto &input : this->registered_inputs_) {
+        input->handle_update(true, data[1], data[3], (data[4] << 24) + (data[5] << 16) + (data[6] << 8) + data[7]);
+      }
+      ESP_LOGD(TAG, "Value set OK: %02x %02x %02x %02x %02x %02x %02x", data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
     } else if (data[0] == 0x21) {
-      ESP_LOGW(TAG, "Value set Error: %02x %02x %02x %02x %02x %02x %02x", data[1] data[2] data[3] data[4] data[5] data[6] data[7]);
+      for (auto &input : this->registered_inputs_) {
+        input->handle_update(false, data[1], data[3], (data[4] << 24) + (data[5] << 16) + (data[6] << 8) + data[7]);
+      }
+      ESP_LOGW(TAG, "Value set Error: %02x %02x %02x %02x %02x %02x %02x", data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
     } else {
-      ESP_LOGE(TAG, "Unknown value set status: %02x %02x %02x %02x %02x %02x %02x %02x", data[0], data[1] data[2] data[3] data[4] data[5] data[6] data[7]);
+      ESP_LOGE(TAG, "Unknown value set status: %02x %02x %02x %02x %02x %02x %02x %02x", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
     }
   }
 }
@@ -193,12 +184,6 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
 void HuaweiR4850Component::publish_sensor_state_(sensor::Sensor *sensor, float value) {
   if (sensor) {
     sensor->publish_state(value);
-  }
-}
-
-void HuaweiR4850Component::publish_number_state_(number::Number *number, float value) {
-  if (number) {
-    number->publish_state(value);
   }
 }
 

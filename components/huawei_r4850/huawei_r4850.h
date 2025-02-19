@@ -8,14 +8,20 @@
 namespace esphome {
 namespace huawei_r4850 {
 
+class HuaweiR4850Input {
+ public:
+    HuaweiR4850Input() {}
+    virtual void handle_update(bool success, uint8_t function_code, bool bit, int32_t raw) = 0;
+    virtual void set_offline() = 0;
+};
+
 class HuaweiR4850Component : public PollingComponent {
  public:
   HuaweiR4850Component(canbus::Canbus *canbus);
   void setup() override;
   void update() override;
 
-  void set_output_voltage(float value, bool offline = false);
-  void set_max_output_current(float value, bool offline = false);
+  void set_value(uint8_t function_code, bool bit, int32_t raw);
   void set_offline_values();
 
   void set_input_voltage_sensor(sensor::Sensor *input_voltage_sensor) { input_voltage_sensor_ = input_voltage_sensor; }
@@ -38,15 +44,15 @@ class HuaweiR4850Component : public PollingComponent {
   void set_output_power_sensor(sensor::Sensor *output_power_sensor) { output_power_sensor_ = output_power_sensor; }
   void set_output_temp_sensor(sensor::Sensor *output_temp_sensor) { output_temp_sensor_ = output_temp_sensor; }
 
-  void set_output_voltage_number(number::Number *output_voltage_number) {
-    output_voltage_number_ = output_voltage_number;
-  }
-  void set_max_output_current_number(number::Number *max_output_current_number) {
-    max_output_current_number_ = max_output_current_number;
+  void register_input(HuaweiR4850Input *number) {
+    this->registered_inputs_.push_back(number);
   }
 
   void set_psu_nominal_current(float value) {
     psu_nominal_current_ = value;
+  }
+  float get_psu_nominal_current() {
+    return psu_nominal_current_;
   }
 
  protected:
@@ -66,13 +72,11 @@ class HuaweiR4850Component : public PollingComponent {
   sensor::Sensor *output_power_sensor_{nullptr};
   sensor::Sensor *output_temp_sensor_{nullptr};
 
-  number::Number *output_voltage_number_{nullptr};
-  number::Number *max_output_current_number_{nullptr};
+  std::vector<HuaweiR4850Input *> registered_inputs_{};
 
   void on_frame(uint32_t can_id, bool rtr, std::vector<uint8_t> &data);
 
   void publish_sensor_state_(sensor::Sensor *sensor, float value);
-  void publish_number_state_(number::Number *number, float value);
 };
 
 }  // namespace huawei_r4850

@@ -86,7 +86,7 @@ async def to_code(config):
             max_value=conf[CONF_MAX_VALUE],
             step=conf[CONF_STEP],
         )
-        cg.add(getattr(hub, "set_output_voltage_number")(var))
+        cg.add(getattr(hub, "register_input")(var))
         cg.add(var.set_parent(hub, 0x0))
     if config[CONF_MAX_OUTPUT_CURRENT]:
         conf = config[CONF_MAX_OUTPUT_CURRENT]
@@ -99,5 +99,5 @@ async def to_code(config):
             max_value=conf[CONF_MAX_VALUE],
             step=conf[CONF_STEP],
         )
-        cg.add(getattr(hub, "set_max_output_current_number")(var))
+        cg.add(getattr(hub, "register_input")(var))
         cg.add(var.set_parent(hub, 0x3))
