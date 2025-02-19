@@ -13,6 +13,7 @@ static const char *const TAG = "huawei_r4850";
 static const uint32_t CAN_ID_REQUEST = 0x108040FE;
 static const uint32_t CAN_ID_DATA = 0x1081407F;
 static const uint32_t CAN_ID_SET = 0x108180FE;
+static const uint32_t CAN_ID_SET_ACK = 0x1081807E;
 
 static const uint8_t R48xx_DATA_INPUT_POWER = 0x70;
 static const uint8_t R48xx_DATA_INPUT_FREQ = 0x71;
@@ -177,6 +178,14 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
       default:
         // printf("Unknown parameter 0x%02X, 0x%04X\r\n",frame[1], value);
         break;
+    }
+  } else if (can_id == CAN_ID_SET_ACK) {
+    if(data[0] == 0x01) {
+      ESP_LOGD(TAG, "Value set OK: %02x %02x %02x %02x %02x %02x %02x", data[1] data[2] data[3] data[4] data[5] data[6] data[7]);
+    } else if (data[0] == 0x21) {
+      ESP_LOGW(TAG, "Value set Error: %02x %02x %02x %02x %02x %02x %02x", data[1] data[2] data[3] data[4] data[5] data[6] data[7]);
+    } else {
+      ESP_LOGE(TAG, "Unknown value set status: %02x %02x %02x %02x %02x %02x %02x %02x", data[0], data[1] data[2] data[3] data[4] data[5] data[6] data[7]);
     }
   }
 }
