@@ -6,6 +6,7 @@ namespace huawei_r4850 {
 
 static const int8_t SET_VOLTAGE_FUNCTION = 0x0;
 static const int8_t SET_CURRENT_FUNCTION = 0x3;
+static const int8_t SET_INPUT_CURRENT_FUNCTION = 0x9;
 
 void HuaweiR4850Number::set_parent(HuaweiR4850Component *parent, uint8_t functionCode) {
   this->parent_ = parent;
@@ -19,7 +20,15 @@ void HuaweiR4850Number::set_parent(HuaweiR4850Component *parent, uint8_t functio
 }
 
 void HuaweiR4850Number::control(float value) {
-  parent_->set_value(this->functionCode_, 0, value * this->multiplier_ * 1024.0f);
+  if(this->functionCode_ == SET_INPUT_CURRENT_FUNCTION) {
+    if(value > 0.0f) {
+      parent_->set_value(this->functionCode_, true, value * this->multiplier_ * 1024.0f);
+    } else {
+      parent_->set_value(this->functionCode_, false, 0);
+    }
+  } else {
+    parent_->set_value(this->functionCode_, 0, value * this->multiplier_ * 1024.0f);
+  }
 }
 
 void HuaweiR4850Number::handle_update(bool success, uint8_t function_code, bool bit, int32_t raw) {

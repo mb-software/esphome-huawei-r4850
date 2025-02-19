@@ -22,7 +22,7 @@ from .. import HuaweiR4850Component, huawei_r4850_ns, CONF_HUAWEI_R4850_ID
 
 CONF_OUTPUT_VOLTAGE = "output_voltage"
 CONF_MAX_OUTPUT_CURRENT = "max_output_current"
-
+CONF_MAX_AC_CURRENT = "max_ac_current"
 
 HuaweiR4850Number = huawei_r4850_ns.class_(
     "HuaweiR4850Number", number.Number, cg.Component
@@ -68,6 +68,24 @@ CONFIG_SCHEMA = cv.All(
                     ): cv.entity_category,
                 }
             ),
+            cv.Optional(CONF_MAX_AC_CURRENT): number.NUMBER_SCHEMA.extend(
+                {
+                    cv.GenerateID(): cv.declare_id(HuaweiR4850Number),
+                    cv.Optional(CONF_MIN_VALUE, default=0): cv.float_,
+                    cv.Optional(CONF_MAX_VALUE, default=20): cv.float_,
+                    cv.Optional(CONF_STEP, default=0.1): cv.float_,
+                    cv.Optional(CONF_ICON, default=ICON_CURRENT_AC): cv.icon,
+                    cv.Optional(
+                        CONF_UNIT_OF_MEASUREMENT, default=UNIT_AMPERE
+                    ): cv.string_strict,
+                    cv.Optional(CONF_MODE, default="BOX"): cv.enum(
+                        number.NUMBER_MODES, upper=True
+                    ),
+                    cv.Optional(
+                        CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_NONE
+                    ): cv.entity_category
+                }
+            ),
         }
     ).extend(cv.COMPONENT_SCHEMA)
 )
@@ -101,3 +119,16 @@ async def to_code(config):
         )
         cg.add(getattr(hub, "register_input")(var))
         cg.add(var.set_parent(hub, 0x3))
+    if config[CONF_MAX_AC_CURRENT]:
+        conf = config[CONF_MAX_AC_CURRENT]
+        var = cg.new_Pvariable(conf[CONF_ID])
+        await cg.register_component(var, conf)
+        await number.register_number(
+            var,
+            conf,
+            min_value=conf[CONF_MIN_VALUE],
+            max_value=conf[CONF_MAX_VALUE],
+            step=conf[CONF_STEP],
+        )
+        cg.add(getattr(hub, "register_input")(var))
+        cg.add(var.set_parent(hub, 0x9))

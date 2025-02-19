@@ -67,6 +67,8 @@ number:
       name: Set output voltage
     max_output_current:
       name: Max output current
+    max_ac_current:
+      name: AC input current limit
 
 button:
   - platform: huawei_r4850
