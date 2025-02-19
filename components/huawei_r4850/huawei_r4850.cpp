@@ -60,6 +60,7 @@ void HuaweiR4850Component::update() {
     this->publish_sensor_state_(this->input_frequency_sensor_, NAN);
     this->publish_sensor_state_(this->output_power_sensor_, NAN);
     this->publish_sensor_state_(this->output_current_sensor_, NAN);
+    this->publish_sensor_state_(this->output_current_setpoint_sensor_, NAN);
     this->publish_sensor_state_(this->output_voltage_sensor_, NAN);
     this->publish_sensor_state_(this->output_temp_sensor_, NAN);
     this->publish_sensor_state_(this->efficiency_sensor_, NAN);
@@ -120,11 +121,10 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
         break;
 
       case R48xx_DATA_OUTPUT_CURRENT_MAX:
-        // special case: this is the only value (as of now) that both
-        // can be set and is also included in status message.
-        for (auto &input : this->registered_inputs_) {
-          input->handle_update(true, 0x3, false, value);
-        }
+        // this is not equal to the value set via max_output_current
+        // as it is also set (according to the current AC input voltage) when AC limit is set
+        conv_value = value / 1024.0f * this->psu_nominal_current_;
+        this->publish_sensor_state_(this->output_current_setpoint_sensor_, conv_value);
         ESP_LOGV(TAG, "Max Output current: %f", conv_value);
         break;
 

@@ -43,6 +43,8 @@ sensor:
       name: Output voltage
     output_current:
       name: Output current
+    output_current_setpoint:
+      name: Output current setpoint
     output_power:
       name: Output power
     input_voltage:
