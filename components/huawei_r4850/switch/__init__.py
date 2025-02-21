@@ -36,14 +36,14 @@ CONFIG_SCHEMA = cv.All(
 
 async def to_code(config):
     hub = await cg.get_variable(config[CONF_HUAWEI_R4850_ID])
-    if config[CONF_FAN_SPEED_MAX]:
+    if CONF_FAN_SPEED_MAX in config:
         conf = config[CONF_FAN_SPEED_MAX]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)
         await switch.register_switch(var, conf)
         cg.add(getattr(hub, "register_input")(var))
         cg.add(var.set_parent(hub, 0x134))
-    if config[CONF_STANDBY]:
+    if CONF_STANDBY in config:
         conf = config[CONF_STANDBY]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)

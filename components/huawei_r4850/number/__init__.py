@@ -93,7 +93,7 @@ CONFIG_SCHEMA = cv.All(
 
 async def to_code(config):
     hub = await cg.get_variable(config[CONF_HUAWEI_R4850_ID])
-    if config[CONF_OUTPUT_VOLTAGE]:
+    if CONF_OUTPUT_VOLTAGE in config:
         conf = config[CONF_OUTPUT_VOLTAGE]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)
@@ -106,7 +106,7 @@ async def to_code(config):
         )
         cg.add(getattr(hub, "register_input")(var))
         cg.add(var.set_parent(hub, 0x100))
-    if config[CONF_MAX_OUTPUT_CURRENT]:
+    if CONF_MAX_OUTPUT_CURRENT in config:
         conf = config[CONF_MAX_OUTPUT_CURRENT]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)
@@ -119,7 +119,7 @@ async def to_code(config):
         )
         cg.add(getattr(hub, "register_input")(var))
         cg.add(var.set_parent(hub, 0x103))
-    if config[CONF_MAX_AC_CURRENT]:
+    if CONF_MAX_AC_CURRENT in config:
         conf = config[CONF_MAX_AC_CURRENT]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)

@@ -8,8 +8,8 @@ static const int16_t SET_FAN_SPEED_MAX_FUNCTION = 0x134;
 static const int16_t SET_STANDBY_FUNCTION = 0x132;
 
 void HuaweiR4850Switch::write_state(bool state) {
-  std::vector<uint8_t> data = {0x00, (state ? 0x01 : 0x00), 0x00, 0x00, 0x00, 0x00};
-  parent_->set_value(this->registerId_, state, 0);
+  std::vector<uint8_t> data = {0x00, (uint8_t)(state ? 0x01 : 0x00), 0x00, 0x00, 0x00, 0x00};
+  parent_->set_value(this->registerId_, data);
 }
 
 void HuaweiR4850Switch::handle_update(bool success, uint16_t register_id, std::vector<uint8_t> &data) {

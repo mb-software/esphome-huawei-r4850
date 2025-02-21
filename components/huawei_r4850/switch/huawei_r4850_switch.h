@@ -8,7 +8,7 @@ namespace huawei_r4850 {
 
 class HuaweiR4850Switch : public switch_::Switch, public Component, public HuaweiR4850Input {
  public:
-  void set_parent(HuaweiR4850Component *parent, uint8_t registerId) {
+  void set_parent(HuaweiR4850Component *parent, uint16_t registerId) {
     this->parent_ = parent;
     this->registerId_ = registerId;
   };
@@ -18,7 +18,7 @@ class HuaweiR4850Switch : public switch_::Switch, public Component, public Huawe
 
  protected:
   HuaweiR4850Component *parent_;
-  uint8_t registerId_;
+  uint16_t registerId_;
 
   void write_state(bool state) override;
 };

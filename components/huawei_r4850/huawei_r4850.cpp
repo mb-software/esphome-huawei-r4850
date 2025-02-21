@@ -75,7 +75,7 @@ void HuaweiR4850Component::set_value(uint16_t register_id, std::vector<uint8_t> 
 
   uint32_t canId = this->canid_pack_(this->psu_addr_, R48xx_CMD_CONTROL, true, false);
 
-  std::vector<uint8_t> message = {(register_id & 0xF00) >> 8, register_id & 0x0FF};
+  std::vector<uint8_t> message = {(uint8_t)((register_id & 0xF00) >> 8), (uint8_t)(register_id & 0x0FF)};
   message.insert(message.end(), data.begin(), data.end());
 
   this->canbus->send_data(canId, true, message);

@@ -23,7 +23,7 @@ void HuaweiR4850Number::control(float value) {
   if (this->registerId_ == SET_INPUT_CURRENT_FUNCTION) {
     if (value > 0.0f) {
       int32_t raw = value * this->multiplier_ * 1024.0f;
-      std::vector<uint8_t> data = {0x00, 0x01, (raw >> 24) & 0xFF, (raw >> 16) & 0xFF, (raw >> 8) & 0xFF, raw & 0xFF};
+      std::vector<uint8_t> data = {0x00, 0x01, (uint8_t)((raw >> 24) & 0xFF), (uint8_t)((raw >> 16) & 0xFF), (uint8_t)((raw >> 8) & 0xFF), (uint8_t)(raw & 0xFF)};
       parent_->set_value(this->registerId_, data);
     } else {
       std::vector<uint8_t> data = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -31,7 +31,7 @@ void HuaweiR4850Number::control(float value) {
     }
   } else {
     int32_t raw = value * this->multiplier_ * 1024.0f;
-    std::vector<uint8_t> data = {0x00, 0x00, (raw >> 24) & 0xFF, (raw >> 16) & 0xFF, (raw >> 8) & 0xFF, raw & 0xFF};
+    std::vector<uint8_t> data = {0x00, 0x00, (uint8_t)((raw >> 24) & 0xFF), (uint8_t)((raw >> 16) & 0xFF), (uint8_t)((raw >> 8) & 0xFF), (uint8_t)(raw & 0xFF)};
     parent_->set_value(this->registerId_, data);
   }
 }
@@ -52,8 +52,12 @@ void HuaweiR4850Number::set_offline() {
   switch (this->registerId_) {
     case SET_VOLTAGE_FUNCTION:
     case SET_CURRENT_FUNCTION:
-      parent_->set_value(this->registerId_+1, 0, this->state * this->multiplier_);
+    {
+      int32_t raw = this->state * this->multiplier_ * 1024.0f;
+      std::vector<uint8_t> data = {0x00, 0x00, (uint8_t)((raw >> 24) & 0xFF), (uint8_t)((raw >> 16) & 0xFF), (uint8_t)((raw >> 8) & 0xFF), (uint8_t)(raw & 0xFF)};
+      parent_->set_value(this->registerId_+1, data);
       break;
+    }
 
     default:
       break;

@@ -30,7 +30,7 @@ CONFIG_SCHEMA = cv.All(
 
 async def to_code(config):
     hub = await cg.get_variable(config[CONF_HUAWEI_R4850_ID])
-    if config[CONF_SET_OFFLINE_VALUES]:
+    if CONF_SET_OFFLINE_VALUES in config:
         conf = config[CONF_SET_OFFLINE_VALUES]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)
