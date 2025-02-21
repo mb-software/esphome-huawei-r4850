@@ -103,10 +103,8 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
   uint8_t error_type = (message[0] & 0xF0) >> 4;
   uint16_t register_id = ((message[0] & 0x0F) << 8) | message[1];
 
-  std::vector<uint8_t> data(message.begin() + 2, message.end());
-
   if (cmd == R48xx_CMD_DATA && !src_controller) {
-    int32_t value = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
+    int32_t value = (message[4] << 24) | (message[5] << 16) | (message[6] << 8) | message[7];
     float conv_value = 0;
     switch (register_id) {
       case R48xx_DATA_INPUT_POWER:
@@ -190,6 +188,7 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
       this->lastUpdate_ = millis();
     }
   } else if (cmd == R48xx_CMD_CONTROL && !src_controller) {
+    std::vector<uint8_t> data(message.begin() + 2, message.end());
     if (error_type == 0) {
       for (auto &input : this->registered_inputs_) {
         input->handle_update(true, register_id, data);
