@@ -11,7 +11,7 @@ namespace huawei_r4850 {
 class HuaweiR4850Input {
  public:
     HuaweiR4850Input() {}
-    virtual void handle_update(bool success, uint8_t function_code, bool bit, int32_t raw) = 0;
+    virtual void handle_update(bool success, uint16_t register_id, std::vector<uint8_t> &data) = 0;
     virtual void set_offline() = 0;
 };
 
@@ -21,7 +21,7 @@ class HuaweiR4850Component : public PollingComponent {
   void setup() override;
   void update() override;
 
-  void set_value(uint8_t function_code, bool bit, int32_t raw);
+  void set_value(uint16_t register_id, std::vector<uint8_t> &data);
   void set_offline_values();
 
   void set_input_voltage_sensor(sensor::Sensor *input_voltage_sensor) { input_voltage_sensor_ = input_voltage_sensor; }
@@ -59,6 +59,7 @@ class HuaweiR4850Component : public PollingComponent {
   canbus::Canbus *canbus;
   uint32_t lastUpdate_;
   float psu_nominal_current_;
+  uint8_t psu_addr_{1};
 
   sensor::Sensor *input_voltage_sensor_{nullptr};
   sensor::Sensor *input_frequency_sensor_{nullptr};
@@ -77,6 +78,8 @@ class HuaweiR4850Component : public PollingComponent {
   void on_frame(uint32_t can_id, bool rtr, std::vector<uint8_t> &data);
 
   void publish_sensor_state_(sensor::Sensor *sensor, float value);
+  uint32_t canid_pack_(uint8_t addr, uint8_t command, bool src_controller, bool incomplete);
+  void canid_unpack_(uint32_t canId, uint8_t *addr, uint8_t *command, bool *src_controller, bool *incomplete);
 };
 
 }  // namespace huawei_r4850

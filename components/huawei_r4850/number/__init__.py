@@ -105,7 +105,7 @@ async def to_code(config):
             step=conf[CONF_STEP],
         )
         cg.add(getattr(hub, "register_input")(var))
-        cg.add(var.set_parent(hub, 0x0))
+        cg.add(var.set_parent(hub, 0x100))
     if config[CONF_MAX_OUTPUT_CURRENT]:
         conf = config[CONF_MAX_OUTPUT_CURRENT]
         var = cg.new_Pvariable(conf[CONF_ID])
@@ -118,7 +118,7 @@ async def to_code(config):
             step=conf[CONF_STEP],
         )
         cg.add(getattr(hub, "register_input")(var))
-        cg.add(var.set_parent(hub, 0x3))
+        cg.add(var.set_parent(hub, 0x103))
     if config[CONF_MAX_AC_CURRENT]:
         conf = config[CONF_MAX_AC_CURRENT]
         var = cg.new_Pvariable(conf[CONF_ID])
@@ -131,4 +131,4 @@ async def to_code(config):
             step=conf[CONF_STEP],
         )
         cg.add(getattr(hub, "register_input")(var))
-        cg.add(var.set_parent(hub, 0x9))
+        cg.add(var.set_parent(hub, 0x109))

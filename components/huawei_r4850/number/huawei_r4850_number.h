@@ -8,13 +8,13 @@ namespace huawei_r4850 {
 
 class HuaweiR4850Number : public number::Number, public Component, public HuaweiR4850Input {
  public:
-  void set_parent(HuaweiR4850Component *parent, uint8_t functionCode);
-  void handle_update(bool success, uint8_t function_code, bool bit, int32_t raw) override;
+  void set_parent(HuaweiR4850Component *parent, uint16_t registerId);
+  void handle_update(bool success, uint16_t register_id, std::vector<uint8_t> &data) override;
   void set_offline();
 
  protected:
   HuaweiR4850Component *parent_;
-  uint8_t functionCode_;
+  uint16_t registerId_;
   float multiplier_;
 
   void control(float value) override;

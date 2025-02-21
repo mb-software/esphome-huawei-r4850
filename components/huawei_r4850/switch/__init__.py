@@ -42,11 +42,11 @@ async def to_code(config):
         await cg.register_component(var, conf)
         await switch.register_switch(var, conf)
         cg.add(getattr(hub, "register_input")(var))
-        cg.add(var.set_parent(hub, 0x34))
+        cg.add(var.set_parent(hub, 0x134))
     if config[CONF_STANDBY]:
         conf = config[CONF_STANDBY]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)
         await switch.register_switch(var, conf)
         cg.add(getattr(hub, "register_input")(var))
-        cg.add(var.set_parent(hub, 0x32))
+        cg.add(var.set_parent(hub, 0x132))
