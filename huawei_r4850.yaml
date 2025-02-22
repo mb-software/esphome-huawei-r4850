@@ -65,15 +65,13 @@ sensor:
 
 number:
   - platform: huawei_r4850
-    output_voltage:
-      name: Set output voltage
-    max_output_current:
-      name: Max output current
+    output_voltage_online:
+      name: Set online output voltage
+    output_voltage_offline:
+      name: Set offline output voltage
+    max_output_current_online:
+      name: Max online output current
+    max_output_current_offline:
+      name: Max offline output current
     max_ac_current:
       name: AC input current limit
-
-button:
-  - platform: huawei_r4850
-    set_offline_values:
-      name: Set offline values
-      

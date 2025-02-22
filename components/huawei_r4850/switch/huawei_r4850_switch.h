@@ -14,7 +14,6 @@ class HuaweiR4850Switch : public switch_::Switch, public Component, public Huawe
   };
 
   void handle_update(bool success, uint16_t register_id, std::vector<uint8_t> &data) override;
-  void set_offline();
 
  protected:
   HuaweiR4850Component *parent_;

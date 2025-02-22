@@ -22,14 +22,5 @@ void HuaweiR4850Switch::handle_update(bool success, uint16_t register_id, std::v
   }
 }
 
-void HuaweiR4850Switch::set_offline() {
-  switch (this->registerId_) {
-    case SET_FAN_SPEED_MAX_FUNCTION: // fan speed doesnt have offline
-    case SET_STANDBY_FUNCTION: // don't save standby mode (if that is even possible)
-    default:
-      break;
-  }
-}
-
 }  // namespace huawei_r4850
 }  // namespace esphome

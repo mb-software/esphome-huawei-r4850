@@ -12,7 +12,6 @@ class HuaweiR4850Input {
  public:
     HuaweiR4850Input() {}
     virtual void handle_update(bool success, uint16_t register_id, std::vector<uint8_t> &data) = 0;
-    virtual void set_offline() = 0;
 };
 
 class HuaweiR4850Component : public PollingComponent {
@@ -22,7 +21,6 @@ class HuaweiR4850Component : public PollingComponent {
   void update() override;
 
   void set_value(uint16_t register_id, std::vector<uint8_t> &data);
-  void set_offline_values();
 
   void set_input_voltage_sensor(sensor::Sensor *input_voltage_sensor) { input_voltage_sensor_ = input_voltage_sensor; }
   void set_input_frequency_sensor(sensor::Sensor *input_frequency_sensor) {

@@ -81,12 +81,6 @@ void HuaweiR4850Component::set_value(uint16_t register_id, std::vector<uint8_t> 
   this->canbus->send_data(canId, true, message);
 }
 
-void HuaweiR4850Component::set_offline_values() {
-  for (auto &input : this->registered_inputs_) {
-    input->set_offline();
-  }
-}
-
 void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8_t> &message) {
   if (message.size() < 8) {
     return;

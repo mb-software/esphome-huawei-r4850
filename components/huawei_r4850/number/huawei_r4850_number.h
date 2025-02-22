@@ -10,7 +10,6 @@ class HuaweiR4850Number : public number::Number, public Component, public Huawei
  public:
   void set_parent(HuaweiR4850Component *parent, uint16_t registerId);
   void handle_update(bool success, uint16_t register_id, std::vector<uint8_t> &data) override;
-  void set_offline();
 
  protected:
   HuaweiR4850Component *parent_;

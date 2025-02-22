@@ -20,8 +20,10 @@ from esphome.const import (
 from .. import HuaweiR4850Component, huawei_r4850_ns, CONF_HUAWEI_R4850_ID
 
 
-CONF_OUTPUT_VOLTAGE = "output_voltage"
-CONF_MAX_OUTPUT_CURRENT = "max_output_current"
+CONF_OUTPUT_VOLTAGE_ONLINE = "output_voltage_online"
+CONF_OUTPUT_VOLTAGE_OFFLINE = "output_voltage_offline"
+CONF_MAX_OUTPUT_CURRENT_ONLINE = "max_output_current_online"
+CONF_MAX_OUTPUT_CURRENT_OFFLINE = "max_output_current_offline"
 CONF_MAX_AC_CURRENT = "max_ac_current"
 
 HuaweiR4850Number = huawei_r4850_ns.class_(
@@ -32,7 +34,7 @@ CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
             cv.GenerateID(CONF_HUAWEI_R4850_ID): cv.use_id(HuaweiR4850Component),
-            cv.Optional(CONF_OUTPUT_VOLTAGE): number.NUMBER_SCHEMA.extend(
+            cv.Optional(CONF_OUTPUT_VOLTAGE_ONLINE): number.NUMBER_SCHEMA.extend(
                 {
                     cv.GenerateID(): cv.declare_id(HuaweiR4850Number),
                     cv.Optional(CONF_MIN_VALUE, default=42): cv.float_,
@@ -50,7 +52,43 @@ CONFIG_SCHEMA = cv.All(
                     ): cv.entity_category,
                 }
             ),
-            cv.Optional(CONF_MAX_OUTPUT_CURRENT): number.NUMBER_SCHEMA.extend(
+            cv.Optional(CONF_OUTPUT_VOLTAGE_OFFLINE): number.NUMBER_SCHEMA.extend(
+                {
+                    cv.GenerateID(): cv.declare_id(HuaweiR4850Number),
+                    cv.Optional(CONF_MIN_VALUE, default=42): cv.float_,
+                    cv.Optional(CONF_MAX_VALUE, default=58): cv.float_,
+                    cv.Optional(CONF_STEP, default=0.1): cv.float_,
+                    cv.Optional(CONF_ICON, default=ICON_FLASH): cv.icon,
+                    cv.Optional(
+                        CONF_UNIT_OF_MEASUREMENT, default=UNIT_VOLT
+                    ): cv.string_strict,
+                    cv.Optional(CONF_MODE, default="BOX"): cv.enum(
+                        number.NUMBER_MODES, upper=True
+                    ),
+                    cv.Optional(
+                        CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_NONE
+                    ): cv.entity_category,
+                }
+            ),
+            cv.Optional(CONF_MAX_OUTPUT_CURRENT_ONLINE): number.NUMBER_SCHEMA.extend(
+                {
+                    cv.GenerateID(): cv.declare_id(HuaweiR4850Number),
+                    cv.Optional(CONF_MIN_VALUE, default=0): cv.float_,
+                    cv.Optional(CONF_MAX_VALUE, default=60): cv.float_,
+                    cv.Optional(CONF_STEP, default=0.1): cv.float_,
+                    cv.Optional(CONF_ICON, default=ICON_CURRENT_AC): cv.icon,
+                    cv.Optional(
+                        CONF_UNIT_OF_MEASUREMENT, default=UNIT_AMPERE
+                    ): cv.string_strict,
+                    cv.Optional(CONF_MODE, default="BOX"): cv.enum(
+                        number.NUMBER_MODES, upper=True
+                    ),
+                    cv.Optional(
+                        CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_NONE
+                    ): cv.entity_category,
+                }
+            ),
+            cv.Optional(CONF_MAX_OUTPUT_CURRENT_OFFLINE): number.NUMBER_SCHEMA.extend(
                 {
                     cv.GenerateID(): cv.declare_id(HuaweiR4850Number),
                     cv.Optional(CONF_MIN_VALUE, default=0): cv.float_,
@@ -93,8 +131,8 @@ CONFIG_SCHEMA = cv.All(
 
 async def to_code(config):
     hub = await cg.get_variable(config[CONF_HUAWEI_R4850_ID])
-    if CONF_OUTPUT_VOLTAGE in config:
-        conf = config[CONF_OUTPUT_VOLTAGE]
+    if CONF_OUTPUT_VOLTAGE_ONLINE in config:
+        conf = config[CONF_OUTPUT_VOLTAGE_ONLINE]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)
         await number.register_number(
@@ -106,8 +144,21 @@ async def to_code(config):
         )
         cg.add(getattr(hub, "register_input")(var))
         cg.add(var.set_parent(hub, 0x100))
-    if CONF_MAX_OUTPUT_CURRENT in config:
-        conf = config[CONF_MAX_OUTPUT_CURRENT]
+    if CONF_OUTPUT_VOLTAGE_OFFLINE in config:
+        conf = config[CONF_OUTPUT_VOLTAGE_OFFLINE]
+        var = cg.new_Pvariable(conf[CONF_ID])
+        await cg.register_component(var, conf)
+        await number.register_number(
+            var,
+            conf,
+            min_value=conf[CONF_MIN_VALUE],
+            max_value=conf[CONF_MAX_VALUE],
+            step=conf[CONF_STEP],
+        )
+        cg.add(getattr(hub, "register_input")(var))
+        cg.add(var.set_parent(hub, 0x101))
+    if CONF_MAX_OUTPUT_CURRENT_ONLINE in config:
+        conf = config[CONF_MAX_OUTPUT_CURRENT_ONLINE]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)
         await number.register_number(
@@ -119,6 +170,19 @@ async def to_code(config):
         )
         cg.add(getattr(hub, "register_input")(var))
         cg.add(var.set_parent(hub, 0x103))
+    if CONF_MAX_OUTPUT_CURRENT_OFFLINE in config:
+        conf = config[CONF_MAX_OUTPUT_CURRENT_OFFLINE]
+        var = cg.new_Pvariable(conf[CONF_ID])
+        await cg.register_component(var, conf)
+        await number.register_number(
+            var,
+            conf,
+            min_value=conf[CONF_MIN_VALUE],
+            max_value=conf[CONF_MAX_VALUE],
+            step=conf[CONF_STEP],
+        )
+        cg.add(getattr(hub, "register_input")(var))
+        cg.add(var.set_parent(hub, 0x104))
     if CONF_MAX_AC_CURRENT in config:
         conf = config[CONF_MAX_AC_CURRENT]
         var = cg.new_Pvariable(conf[CONF_ID])

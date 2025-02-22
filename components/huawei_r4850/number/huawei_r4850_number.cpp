@@ -4,15 +4,17 @@
 namespace esphome {
 namespace huawei_r4850 {
 
-static const uint16_t SET_VOLTAGE_FUNCTION = 0x100;
-static const uint16_t SET_CURRENT_FUNCTION = 0x103;
+static const uint16_t SET_ONLINE_VOLTAGE_FUNCTION = 0x100;
+static const uint16_t SET_OFFLINE_VOLTAGE_FUNCTION = 0x101;
+static const uint16_t SET_ONLINE_CURRENT_FUNCTION = 0x103;
+static const uint16_t SET_OFFLINE_CURRENT_FUNCTION = 0x104;
 static const uint16_t SET_INPUT_CURRENT_FUNCTION = 0x109;
 
 void HuaweiR4850Number::set_parent(HuaweiR4850Component *parent, uint16_t registerId) {
   this->parent_ = parent;
   this->registerId_ = registerId;
 
-  if (registerId == SET_CURRENT_FUNCTION) {
+  if (registerId == SET_ONLINE_CURRENT_FUNCTION || registerId == SET_OFFLINE_CURRENT_FUNCTION) {
     this->multiplier_ = 1.0f / parent->get_psu_nominal_current();
   } else {
     this->multiplier_ = 1.0f;
@@ -45,22 +47,6 @@ void HuaweiR4850Number::handle_update(bool success, uint16_t register_id, std::v
     this->publish_state(std::round(value * 10.0f) / 10.0f); // assume 1 decimal
   } else {
     this->publish_state(NAN);
-  }
-}
-
-void HuaweiR4850Number::set_offline() {
-  switch (this->registerId_) {
-    case SET_VOLTAGE_FUNCTION:
-    case SET_CURRENT_FUNCTION:
-    {
-      int32_t raw = this->state * this->multiplier_ * 1024.0f;
-      std::vector<uint8_t> data = {0x00, 0x00, (uint8_t)((raw >> 24) & 0xFF), (uint8_t)((raw >> 16) & 0xFF), (uint8_t)((raw >> 8) & 0xFF), (uint8_t)(raw & 0xFF)};
-      parent_->set_value(this->registerId_+1, data);
-      break;
-    }
-
-    default:
-      break;
   }
 }
 
