@@ -76,3 +76,5 @@ number:
       name: Max offline output current
     max_ac_current:
       name: AC input current limit
+    fan_duty_cycle:
+      name: Fan duty cycle

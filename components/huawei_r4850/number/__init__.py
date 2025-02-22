@@ -10,10 +10,12 @@ from esphome.const import (
     CONF_ENTITY_CATEGORY,
     ICON_FLASH,
     ICON_CURRENT_AC,
+    ICON_FAN,
     CONF_MIN_VALUE,
     CONF_MAX_VALUE,
     CONF_STEP,
     UNIT_AMPERE,
+    UNIT_PERCENT,
     ENTITY_CATEGORY_NONE,
 )
 
@@ -25,6 +27,7 @@ CONF_OUTPUT_VOLTAGE_OFFLINE = "output_voltage_offline"
 CONF_MAX_OUTPUT_CURRENT_ONLINE = "max_output_current_online"
 CONF_MAX_OUTPUT_CURRENT_OFFLINE = "max_output_current_offline"
 CONF_MAX_AC_CURRENT = "max_ac_current"
+CONF_FAN_DUTY_CYCLE = "fan_duty_cycle"
 
 HuaweiR4850Number = huawei_r4850_ns.class_(
     "HuaweiR4850Number", number.Number, cg.Component
@@ -124,6 +127,22 @@ CONFIG_SCHEMA = cv.All(
                     ): cv.entity_category
                 }
             ),
+            cv.Optional(CONF_FAN_DUTY_CYCLE): number.NUMBER_SCHEMA.extend(
+                {
+                    cv.GenerateID(): cv.declare_id(HuaweiR4850Number),
+                    cv.Optional(CONF_STEP, default=1): cv.float_,
+                    cv.Optional(CONF_ICON, default=ICON_FAN): cv.icon,
+                    cv.Optional(
+                        CONF_UNIT_OF_MEASUREMENT, default=UNIT_PERCENT
+                    ): cv.string_strict,
+                    cv.Optional(CONF_MODE, default="SLIDER"): cv.enum(
+                        number.NUMBER_MODES, upper=True
+                    ),
+                    cv.Optional(
+                        CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_NONE
+                    ): cv.entity_category
+                }
+            ),
         }
     ).extend(cv.COMPONENT_SCHEMA)
 )
@@ -196,3 +215,16 @@ async def to_code(config):
         )
         cg.add(getattr(hub, "register_input")(var))
         cg.add(var.set_parent(hub, 0x109))
+    if CONF_FAN_DUTY_CYCLE in config:
+        conf = config[CONF_FAN_DUTY_CYCLE]
+        var = cg.new_Pvariable(conf[CONF_ID])
+        await cg.register_component(var, conf)
+        await number.register_number(
+            var,
+            conf,
+            min_value=0.0,
+            max_value=100.0,
+            step=conf[CONF_STEP],
+        )
+        cg.add(getattr(hub, "register_input")(var))
+        cg.add(var.set_parent(hub, 0x114))

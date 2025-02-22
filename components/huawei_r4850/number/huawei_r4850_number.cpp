@@ -9,6 +9,7 @@ static const uint16_t SET_OFFLINE_VOLTAGE_FUNCTION = 0x101;
 static const uint16_t SET_ONLINE_CURRENT_FUNCTION = 0x103;
 static const uint16_t SET_OFFLINE_CURRENT_FUNCTION = 0x104;
 static const uint16_t SET_INPUT_CURRENT_FUNCTION = 0x109;
+static const uint16_t SET_FAN_DUTY_CYCLE = 0x114;
 
 void HuaweiR4850Number::set_parent(HuaweiR4850Component *parent, uint16_t registerId) {
   this->parent_ = parent;
@@ -46,6 +47,14 @@ void HuaweiR4850Number::control(float value) {
         std::vector<uint8_t> data = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         this->parent_->set_value(this->registerId_, data);
       }
+      break;
+    }
+
+    case SET_FAN_DUTY_CYCLE:
+    {
+      uint16_t raw = value / 100.0f * 25600.0f;
+      std::vector<uint8_t> data = {(uint8_t)((raw >> 8) & 0xFF), (uint8_t)(raw & 0xFF), 0x00, 0x00, 0x00, 0x00};
+      this->parent_->set_value(this->registerId_, data);
       break;
     }
   
@@ -86,6 +95,13 @@ void HuaweiR4850Number::handle_update(bool success, uint16_t register_id, std::v
         } else {
           value = 0.0f;
         }
+        break;
+      }
+  
+      case SET_FAN_DUTY_CYCLE:
+      {
+        int16_t raw = (data[0] << 8) | data[1];
+        value = raw / 25600.0f * 100.0f;
         break;
       }
     
