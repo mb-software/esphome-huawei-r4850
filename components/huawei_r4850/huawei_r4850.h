@@ -11,7 +11,8 @@ namespace huawei_r4850 {
 class HuaweiR4850Input {
  public:
     HuaweiR4850Input() {}
-    virtual void handle_update(bool success, uint16_t register_id, std::vector<uint8_t> &data) = 0;
+    virtual void handle_update(uint16_t register_id, std::vector<uint8_t> &data) = 0;
+    virtual void handle_error(uint16_t register_id, std::vector<uint8_t> &data) = 0;
 };
 
 class HuaweiR4850Component : public PollingComponent {

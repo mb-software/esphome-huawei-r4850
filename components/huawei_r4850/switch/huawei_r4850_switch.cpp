@@ -12,14 +12,15 @@ void HuaweiR4850Switch::write_state(bool state) {
   this->parent_->set_value(this->registerId_, data);
 }
 
-void HuaweiR4850Switch::handle_update(bool success, uint16_t register_id, std::vector<uint8_t> &data) {
+void HuaweiR4850Switch::handle_update(uint16_t register_id, std::vector<uint8_t> &data) {
   if (register_id != this->registerId_)
     return;
-  if(success) {
-    this->publish_state(data[1]);
-  } else {
-    // can't publish invalid state so just don't publish anything
-  }
+  this->publish_state(data[1]);
+}
+void HuaweiR4850Switch::handle_error(uint16_t register_id, std::vector<uint8_t> &data) {
+  if (register_id != this->registerId_)
+    return;
+  // we should set the state to "unknown" here, but ESPHome doesn't have a way to do that (for switch entities).
 }
 
 }  // namespace huawei_r4850

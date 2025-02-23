@@ -63,54 +63,72 @@ void HuaweiR4850Number::control(float value) {
   }
 }
 
-void HuaweiR4850Number::handle_update(bool success, uint16_t register_id, std::vector<uint8_t> &data) {
+void HuaweiR4850Number::handle_update(uint16_t register_id, std::vector<uint8_t> &data) {
   if (register_id != this->registerId_)
     return;
-  if (success) {
-    float value = 0;
-    switch (this->registerId_)
+
+  float value = 0;
+  switch (this->registerId_)
+  {
+    case SET_ONLINE_VOLTAGE_FUNCTION:
+    case SET_OFFLINE_VOLTAGE_FUNCTION:
     {
-      case SET_ONLINE_VOLTAGE_FUNCTION:
-      case SET_OFFLINE_VOLTAGE_FUNCTION:
-      {
-        int32_t raw = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
-        value = raw / 1024.0f;
-        break;
-      }
-      
-      case SET_ONLINE_CURRENT_FUNCTION:
-      case SET_OFFLINE_CURRENT_FUNCTION:
-      {
-        int32_t raw = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
-        value = raw / 1250.0f * this->parent_->get_psu_max_current();
-        break;
-      }
-  
-      case SET_INPUT_CURRENT_FUNCTION:
-      {
-        bool active = data[1];
-        if (active) {
-          int32_t raw = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
-          value = raw / 1024.0f;
-        } else {
-          value = 0.0f;
-        }
-        break;
-      }
-  
-      case SET_FAN_DUTY_CYCLE:
-      {
-        int16_t raw = (data[0] << 8) | data[1];
-        value = raw / 25600.0f * 100.0f;
-        break;
-      }
-    
-    default:
+      int32_t raw = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
+      value = raw / 1024.0f;
       break;
     }
-    this->publish_state(std::round(value * 10.0f) / 10.0f); // assume 1 decimal
-  } else {
-    this->publish_state(NAN);
+    
+    case SET_ONLINE_CURRENT_FUNCTION:
+    case SET_OFFLINE_CURRENT_FUNCTION:
+    {
+      int32_t raw = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
+      value = raw / 1250.0f * this->parent_->get_psu_max_current();
+      break;
+    }
+
+    case SET_INPUT_CURRENT_FUNCTION:
+    {
+      bool active = data[1];
+      if (active) {
+        int32_t raw = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
+        value = raw / 1024.0f;
+      } else {
+        value = 0.0f;
+      }
+      break;
+    }
+
+    case SET_FAN_DUTY_CYCLE:
+    {
+      int16_t raw = (data[0] << 8) | data[1];
+      value = raw / 25600.0f * 100.0f;
+      break;
+    }
+  
+  default:
+    break;
+  }
+  this->publish_state(std::round(value * 10.0f) / 10.0f); // assume 1 decimal
+}
+void HuaweiR4850Number::handle_error(uint16_t register_id, std::vector<uint8_t> &data) {
+  if (register_id != this->registerId_)
+    return;
+
+  switch (register_id)
+  {
+    case SET_FAN_DUTY_CYCLE:
+      if (this->state == 0.0f) {
+        // When HA tries to set the value from 0% to 10% (invalid), and we try to set it
+        // back to 0%, the UI doesn't update (because the entity state was already 0%).
+        // HACK: first publish state as if setting was successful, then immediately set it to 0.
+        this->handle_update(register_id, data);
+      }
+      this->publish_state(0.0f); // when the duty cycle is out of range, the PSU sets it back to auto.
+      break;
+    
+    default:
+      this->publish_state(NAN); // set state to "unknown"
+      break;
   }
 }
 

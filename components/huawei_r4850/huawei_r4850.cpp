@@ -185,12 +185,12 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
     std::vector<uint8_t> data(message.begin() + 2, message.end());
     if (error_type == 0) {
       for (auto &input : this->registered_inputs_) {
-        input->handle_update(true, register_id, data);
+        input->handle_update(register_id, data);
       }
       ESP_LOGD(TAG, "Value %03x set OK: %02x %02x %02x %02x %02x %02x", register_id, data[0], data[1], data[2], data[3], data[4], data[5]);
     } else {
       for (auto &input : this->registered_inputs_) {
-        input->handle_update(false, register_id, data);
+        input->handle_error(register_id, data);
       }
       ESP_LOGW(TAG, "Value %03x set error: %d", register_id, error_type);
     }
