@@ -5,7 +5,7 @@ from esphome.const import CONF_ID
 
 CONF_CANBUS_ID = "canbus_id"
 CONF_HUAWEI_R4850_ID = "huawei_r4850_id"
-CONF_PSU_NOMINAL_CURRENT = "psu_nominal_current"
+CONF_PSU_MAX_CURRENT = "psu_max_current"
 
 huawei_r4850_ns = cg.esphome_ns.namespace("huawei_r4850")
 HuaweiR4850Component = huawei_r4850_ns.class_(
@@ -16,7 +16,7 @@ CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(HuaweiR4850Component),
         cv.Required(CONF_CANBUS_ID): cv.use_id(CanbusComponent),
-        cv.Optional(CONF_PSU_NOMINAL_CURRENT, default=50): cv.float_range(min=0, max=100, min_included=False),
+        cv.Optional(CONF_PSU_MAX_CURRENT, default=63.3): cv.float_range(min=0, min_included=False),
     }
 ).extend(cv.polling_component_schema("5s"))
 
@@ -28,5 +28,5 @@ async def to_code(config):
 
     hub = await cg.get_variable(config[CONF_ID])
 
-    nominal_current = config.get(CONF_PSU_NOMINAL_CURRENT)
-    cg.add(hub.set_psu_nominal_current(nominal_current))
+    max_current = config.get(CONF_PSU_MAX_CURRENT)
+    cg.add(hub.set_psu_max_current(max_current))

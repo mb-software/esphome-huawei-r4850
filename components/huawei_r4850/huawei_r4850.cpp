@@ -140,7 +140,7 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
       case R48xx_DATA_OUTPUT_CURRENT_MAX:
         // this is not equal to the value set via max_output_current
         // as it is also set (according to the current AC input voltage) when AC limit is set
-        conv_value = value / 1024.0f * this->psu_nominal_current_;
+        conv_value = value / 1250.0f * this->psu_max_current_;
         this->publish_sensor_state_(this->output_current_setpoint_sensor_, conv_value);
         ESP_LOGV(TAG, "Max Output current: %f", conv_value);
         break;

@@ -46,17 +46,17 @@ class HuaweiR4850Component : public PollingComponent {
     this->registered_inputs_.push_back(number);
   }
 
-  void set_psu_nominal_current(float value) {
-    psu_nominal_current_ = value;
+  void set_psu_max_current(float value) {
+    psu_max_current_ = value;
   }
-  float get_psu_nominal_current() {
-    return psu_nominal_current_;
+  float get_psu_max_current() {
+    return psu_max_current_;
   }
 
  protected:
   canbus::Canbus *canbus;
   uint32_t lastUpdate_;
-  float psu_nominal_current_;
+  float psu_max_current_;
   uint8_t psu_addr_{1};
 
   sensor::Sensor *input_voltage_sensor_{nullptr};

@@ -36,6 +36,7 @@ canbus:
 huawei_r4850:
   canbus_id: can
   update_interval: 5s
+  psu_max_current: 53.5 # ~53.5 for R4850G6, ~42.6 for R4830S1
 
 sensor:
   - platform: huawei_r4850

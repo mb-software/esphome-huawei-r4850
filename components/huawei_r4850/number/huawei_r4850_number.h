@@ -14,7 +14,6 @@ class HuaweiR4850Number : public number::Number, public Component, public Huawei
  protected:
   HuaweiR4850Component *parent_;
   uint16_t registerId_;
-  float multiplier_;
 
   void control(float value) override;
 };
