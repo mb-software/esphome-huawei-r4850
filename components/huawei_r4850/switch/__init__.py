@@ -3,6 +3,9 @@ import esphome.config_validation as cv
 from esphome.components import switch
 from esphome.const import (
     CONF_ID,
+    CONF_ICON,
+    ICON_FAN,
+    ICON_POWER,
 )
 
 from .. import HuaweiR4850Component, huawei_r4850_ns, CONF_HUAWEI_R4850_ID
@@ -19,16 +22,8 @@ CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
             cv.GenerateID(CONF_HUAWEI_R4850_ID): cv.use_id(HuaweiR4850Component),
-            cv.Optional(CONF_FAN_SPEED_MAX): switch.SWITCH_SCHEMA.extend(
-                {
-                    cv.GenerateID(): cv.declare_id(HuaweiR4850Switch)
-                }
-            ),
-            cv.Optional(CONF_STANDBY): switch.SWITCH_SCHEMA.extend(
-                {
-                    cv.GenerateID(): cv.declare_id(HuaweiR4850Switch)
-                }
-            ),
+            cv.Optional(CONF_FAN_SPEED_MAX): switch.switch_schema(HuaweiR4850Switch, icon=ICON_FAN),
+            cv.Optional(CONF_STANDBY): switch.switch_schema(HuaweiR4850Switch, icon=ICON_POWER),
         }
     ).extend(cv.COMPONENT_SCHEMA)
 )
