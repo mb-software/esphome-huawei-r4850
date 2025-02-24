@@ -22,6 +22,11 @@ void HuaweiR4850Switch::handle_error(uint16_t register_id, std::vector<uint8_t> 
     return;
   // we should set the state to "unknown" here, but ESPHome doesn't have a way to do that (for switch entities).
 }
+void HuaweiR4850Switch::handle_timeout() {
+  // we should set the state to "unavailable" here, but ESPHome doesn't have a way to do that:
+  // https://github.com/esphome/feature-requests/issues/1568
+  // and there isn't a way to set it to "unknown" either.
+}
 
 }  // namespace huawei_r4850
 }  // namespace esphome

@@ -13,6 +13,7 @@ class HuaweiR4850Input {
     HuaweiR4850Input() {}
     virtual void handle_update(uint16_t register_id, std::vector<uint8_t> &data) = 0;
     virtual void handle_error(uint16_t register_id, std::vector<uint8_t> &data) = 0;
+    virtual void handle_timeout() = 0;
 };
 
 class HuaweiR4850Component : public PollingComponent {

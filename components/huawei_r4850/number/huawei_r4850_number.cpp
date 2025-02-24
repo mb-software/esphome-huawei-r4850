@@ -131,6 +131,12 @@ void HuaweiR4850Number::handle_error(uint16_t register_id, std::vector<uint8_t> 
       break;
   }
 }
+void HuaweiR4850Number::handle_timeout() {
+  // we should set the state to "unavailable" here, but ESPHome doesn't have a way to do that:
+  // https://github.com/esphome/feature-requests/issues/1568
+  // so we just set it to "unknown" here.
+  this->publish_state(NAN);
+}
 
 }  // namespace huawei_r4850
 }  // namespace esphome

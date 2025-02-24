@@ -63,6 +63,10 @@ void HuaweiR4850Component::update() {
     this->publish_sensor_state_(this->output_voltage_sensor_, NAN);
     this->publish_sensor_state_(this->output_temp_sensor_, NAN);
     this->publish_sensor_state_(this->efficiency_sensor_, NAN);
+
+    for (auto &input : this->registered_inputs_) {
+      input->handle_timeout();
+    }
   }
 }
 
