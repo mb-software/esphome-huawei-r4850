@@ -22,10 +22,10 @@ from esphome.const import (
 from .. import HuaweiR4850Component, huawei_r4850_ns, CONF_HUAWEI_R4850_ID
 
 
-CONF_OUTPUT_VOLTAGE_ONLINE = "output_voltage_online"
-CONF_OUTPUT_VOLTAGE_OFFLINE = "output_voltage_offline"
-CONF_MAX_OUTPUT_CURRENT_ONLINE = "max_output_current_online"
-CONF_MAX_OUTPUT_CURRENT_OFFLINE = "max_output_current_offline"
+CONF_OUTPUT_VOLTAGE = "output_voltage"
+CONF_OUTPUT_VOLTAGE_DEFAULT = "output_voltage_default"
+CONF_MAX_OUTPUT_CURRENT = "max_output_current"
+CONF_MAX_OUTPUT_CURRENT_DEFAULT = "max_output_current_default"
 CONF_MAX_AC_CURRENT = "max_ac_current"
 CONF_FAN_DUTY_CYCLE = "fan_duty_cycle"
 
@@ -37,7 +37,7 @@ CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
             cv.GenerateID(CONF_HUAWEI_R4850_ID): cv.use_id(HuaweiR4850Component),
-            cv.Optional(CONF_OUTPUT_VOLTAGE_ONLINE): number.NUMBER_SCHEMA.extend(
+            cv.Optional(CONF_OUTPUT_VOLTAGE): number.NUMBER_SCHEMA.extend(
                 {
                     cv.GenerateID(): cv.declare_id(HuaweiR4850Number),
                     cv.Optional(CONF_MIN_VALUE, default=42): cv.float_,
@@ -55,7 +55,7 @@ CONFIG_SCHEMA = cv.All(
                     ): cv.entity_category,
                 }
             ),
-            cv.Optional(CONF_OUTPUT_VOLTAGE_OFFLINE): number.NUMBER_SCHEMA.extend(
+            cv.Optional(CONF_OUTPUT_VOLTAGE_DEFAULT): number.NUMBER_SCHEMA.extend(
                 {
                     cv.GenerateID(): cv.declare_id(HuaweiR4850Number),
                     cv.Optional(CONF_MIN_VALUE, default=42): cv.float_,
@@ -73,7 +73,7 @@ CONFIG_SCHEMA = cv.All(
                     ): cv.entity_category,
                 }
             ),
-            cv.Optional(CONF_MAX_OUTPUT_CURRENT_ONLINE): number.NUMBER_SCHEMA.extend(
+            cv.Optional(CONF_MAX_OUTPUT_CURRENT): number.NUMBER_SCHEMA.extend(
                 {
                     cv.GenerateID(): cv.declare_id(HuaweiR4850Number),
                     cv.Optional(CONF_MIN_VALUE, default=0): cv.float_,
@@ -91,7 +91,7 @@ CONFIG_SCHEMA = cv.All(
                     ): cv.entity_category,
                 }
             ),
-            cv.Optional(CONF_MAX_OUTPUT_CURRENT_OFFLINE): number.NUMBER_SCHEMA.extend(
+            cv.Optional(CONF_MAX_OUTPUT_CURRENT_DEFAULT): number.NUMBER_SCHEMA.extend(
                 {
                     cv.GenerateID(): cv.declare_id(HuaweiR4850Number),
                     cv.Optional(CONF_MIN_VALUE, default=0): cv.float_,

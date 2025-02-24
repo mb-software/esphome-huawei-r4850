@@ -4,10 +4,10 @@
 namespace esphome {
 namespace huawei_r4850 {
 
-static const uint16_t SET_ONLINE_VOLTAGE_FUNCTION = 0x100;
-static const uint16_t SET_OFFLINE_VOLTAGE_FUNCTION = 0x101;
-static const uint16_t SET_ONLINE_CURRENT_FUNCTION = 0x103;
-static const uint16_t SET_OFFLINE_CURRENT_FUNCTION = 0x104;
+static const uint16_t SET_VOLTAGE_FUNCTION = 0x100;
+static const uint16_t SET_DEFAULT_VOLTAGE_FUNCTION = 0x101;
+static const uint16_t SET_CURRENT_FUNCTION = 0x103;
+static const uint16_t SET_DEFAULT_CURRENT_FUNCTION = 0x104;
 static const uint16_t SET_INPUT_CURRENT_FUNCTION = 0x109;
 static const uint16_t SET_FAN_DUTY_CYCLE = 0x114;
 
@@ -19,8 +19,8 @@ void HuaweiR4850Number::set_parent(HuaweiR4850Component *parent, uint16_t regist
 void HuaweiR4850Number::control(float value) {
   switch (this->registerId_)
   {
-    case SET_ONLINE_VOLTAGE_FUNCTION:
-    case SET_OFFLINE_VOLTAGE_FUNCTION:
+    case SET_VOLTAGE_FUNCTION:
+    case SET_DEFAULT_VOLTAGE_FUNCTION:
     {
       int32_t raw = value * 1024.0f;
       std::vector<uint8_t> data = {0x00, 0x00, (uint8_t)((raw >> 24) & 0xFF), (uint8_t)((raw >> 16) & 0xFF), (uint8_t)((raw >> 8) & 0xFF), (uint8_t)(raw & 0xFF)};
@@ -28,8 +28,8 @@ void HuaweiR4850Number::control(float value) {
       break;
     }
     
-    case SET_ONLINE_CURRENT_FUNCTION:
-    case SET_OFFLINE_CURRENT_FUNCTION:
+    case SET_CURRENT_FUNCTION:
+    case SET_DEFAULT_CURRENT_FUNCTION:
     {
       int32_t raw = value / this->parent_->get_psu_max_current() * 1250.0f;
       std::vector<uint8_t> data = {0x00, 0x00, (uint8_t)((raw >> 24) & 0xFF), (uint8_t)((raw >> 16) & 0xFF), (uint8_t)((raw >> 8) & 0xFF), (uint8_t)(raw & 0xFF)};
@@ -70,16 +70,16 @@ void HuaweiR4850Number::handle_update(uint16_t register_id, std::vector<uint8_t>
   float value = 0;
   switch (this->registerId_)
   {
-    case SET_ONLINE_VOLTAGE_FUNCTION:
-    case SET_OFFLINE_VOLTAGE_FUNCTION:
+    case SET_VOLTAGE_FUNCTION:
+    case SET_DEFAULT_VOLTAGE_FUNCTION:
     {
       int32_t raw = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
       value = raw / 1024.0f;
       break;
     }
     
-    case SET_ONLINE_CURRENT_FUNCTION:
-    case SET_OFFLINE_CURRENT_FUNCTION:
+    case SET_CURRENT_FUNCTION:
+    case SET_DEFAULT_CURRENT_FUNCTION:
     {
       int32_t raw = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
       value = raw / 1250.0f * this->parent_->get_psu_max_current();
