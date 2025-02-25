@@ -31,15 +31,25 @@ canbus:
     use_extended_id: true
     can_id: 0
     bit_rate: 125kbps
+    rx_queue_len: 32 # recommended especially with lots of entities as can messages can be lost otherwise
 
 
 huawei_r4850:
-  canbus_id: can
-  update_interval: 5s
-  psu_max_current: 53.5 # ~53.5 for R4850G6, ~42.6 for R4830S1
+  - id: huawei_r4850_1
+    canbus_id: can
+    update_interval: 5s
+    psu_address: 1 # 1 = first PSU, 2 = second, ...
+    psu_max_current: 53.5 # ~53.5 for R4850G6, ~42.6 for R4830S1
+#  - id: huawei_r4850_2
+#    canbus_id: can
+#    update_interval: 5s
+#    psu_address: 2
+#    psu_max_current: 53.5
+
 
 sensor:
   - platform: huawei_r4850
+    huawei_r4850_id: huawei_r4850_1
     output_voltage:
       name: Output voltage
     output_current:
@@ -66,6 +76,7 @@ sensor:
 
 number:
   - platform: huawei_r4850
+    huawei_r4850_id: huawei_r4850_1
     output_voltage:
       name: Set output voltage
     output_voltage_default:
