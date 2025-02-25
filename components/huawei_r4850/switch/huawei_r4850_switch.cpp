@@ -12,6 +12,12 @@ void HuaweiR4850Switch::write_state(bool state) {
   this->parent_->set_value(this->registerId_, data);
 }
 
+bool HuaweiR4850Switch::assumed_state() {
+  // if we could set the value to "unknown" we wouldn't need this, but we can't
+  // so we just tell HA we don't know the state.
+  return true;
+}
+
 void HuaweiR4850Switch::handle_update(uint16_t register_id, std::vector<uint8_t> &data) {
   if (register_id != this->registerId_)
     return;

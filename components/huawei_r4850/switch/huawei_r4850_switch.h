@@ -22,6 +22,7 @@ class HuaweiR4850Switch : public switch_::Switch, public Component, public Huawe
   uint16_t registerId_;
 
   void write_state(bool state) override;
+  bool assumed_state() override;
 };
 
 }  // namespace huawei_r4850
