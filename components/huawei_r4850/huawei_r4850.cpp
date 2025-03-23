@@ -1,4 +1,7 @@
 #include "huawei_r4850.h"
+
+#include <cassert>
+
 #include "esphome/core/application.h"
 #include "esphome/core/base_automation.h"
 #include "esphome/core/automation.h"
@@ -33,7 +36,23 @@ void HuaweiR4850Component::setup() {
   LambdaAction<std::vector<uint8_t>, uint32_t, bool> *lambdaaction;
   canbus::CanbusTrigger *canbus_canbustrigger;
 
-  canbus_canbustrigger = new canbus::CanbusTrigger(this->canbus, 0, 0, true);
+  // match the CAN id so we don't get flooded with unsolicited messages / messages from other PSUs.
+  // match for (binary) 0001 0000 1aaa aaaa xxxx xxxx 0111 111x
+  // where a = address, x = don't care
+
+  // example ID
+  // -> 0001 0000 1aaa aaaa 0000 0000 0111 1110
+  uint32_t canid_id = this->canid_pack_(this->psu_addr_, 0x00, false, false);
+
+  // set everything that has to match ID
+  // (proto ID, address, msg src, group mask, hw/sw addr)
+  // -> 1111 1111 1111 1111 0000 0000 1111 1110
+  uint32_t canid_mask = 0xFFFF00FE;
+
+  // all bits masked away by the mask also have to be set 0 on the id
+  assert(canid_id == (canid_id & canid_mask));
+
+  canbus_canbustrigger = new canbus::CanbusTrigger(this->canbus, canid_id, canid_mask, true);
   canbus_canbustrigger->set_component_source("canbus");
   App.register_component(canbus_canbustrigger);
   automation = new Automation<std::vector<uint8_t>, uint32_t, bool>(canbus_canbustrigger);
@@ -94,14 +113,14 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
   bool src_controller, incomplete;
   this->canid_unpack_(can_id, &psu_addr, &cmd, &src_controller, &incomplete);
 
-  if (psu_addr != this->psu_addr_) {
-    return;
+  if (psu_addr != this->psu_addr_ || src_controller) {
+    return; // shouldn't happen due to can id mask
   }
 
   uint8_t error_type = (message[0] & 0xF0) >> 4;
   uint16_t register_id = ((message[0] & 0x0F) << 8) | message[1];
 
-  if (cmd == R48xx_CMD_DATA && !src_controller) {
+  if (cmd == R48xx_CMD_DATA) {
     int32_t value = (message[4] << 24) | (message[5] << 16) | (message[6] << 8) | message[7];
     float conv_value = 0;
     switch (register_id) {
@@ -185,7 +204,7 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
     if (!incomplete) {
       this->lastUpdate_ = millis();
     }
-  } else if (cmd == R48xx_CMD_CONTROL && !src_controller) {
+  } else if (cmd == R48xx_CMD_CONTROL) {
     std::vector<uint8_t> data(message.begin() + 2, message.end());
     if (error_type == 0) {
       for (auto &input : this->registered_inputs_) {
