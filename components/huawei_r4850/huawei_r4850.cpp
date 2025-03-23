@@ -70,7 +70,7 @@ void HuaweiR4850Component::update() {
   this->canbus->send_data(canId, true, data);
 
   // no new value for 5* intervall -> set sensors to NAN)
-  if (millis() - lastUpdate_ > this->update_interval_ * 5) {
+  if (this->lastUpdate_ != 0 && (millis() - this->lastUpdate_ > this->update_interval_ * 5)) {
     this->publish_sensor_state_(this->input_power_sensor_, NAN);
     this->publish_sensor_state_(this->input_voltage_sensor_, NAN);
     this->publish_sensor_state_(this->input_current_sensor_, NAN);
@@ -86,6 +86,8 @@ void HuaweiR4850Component::update() {
     for (auto &input : this->registered_inputs_) {
       input->handle_timeout();
     }
+
+    this->lastUpdate_ = 0; // reset lastUpdate so we don't publish NaN every interval
   }
 }
 

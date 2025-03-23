@@ -62,7 +62,7 @@ class HuaweiR4850Component : public PollingComponent {
 
  protected:
   canbus::Canbus *canbus;
-  uint32_t lastUpdate_;
+  uint32_t lastUpdate_{0};
   float psu_max_current_;
   uint8_t psu_addr_;
 
