@@ -68,8 +68,10 @@ void HuaweiR4850Component::set_resend_interval(uint32_t interval) {
 }
 
 void HuaweiR4850Component::resend_inputs() {
-  for (auto &input : this->registered_inputs_) {
-    input->resend_state();
+  if (this->lastUpdate_ != 0) {
+    for (auto &input : this->registered_inputs_) {
+      input->resend_state();
+    }
   }
 }
 
