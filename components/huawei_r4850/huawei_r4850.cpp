@@ -83,6 +83,7 @@ void HuaweiR4850Component::update() {
 
   // no new value for 5* intervall -> set sensors to NAN)
   if (this->lastUpdate_ != 0 && (millis() - this->lastUpdate_ > this->update_interval_ * 5)) {
+#ifdef USE_SENSOR
     this->publish_sensor_state_(this->input_power_sensor_, NAN);
     this->publish_sensor_state_(this->input_voltage_sensor_, NAN);
     this->publish_sensor_state_(this->input_current_sensor_, NAN);
@@ -94,6 +95,7 @@ void HuaweiR4850Component::update() {
     this->publish_sensor_state_(this->output_voltage_sensor_, NAN);
     this->publish_sensor_state_(this->output_temp_sensor_, NAN);
     this->publish_sensor_state_(this->efficiency_sensor_, NAN);
+#endif // USE_SENSOR
 
     for (auto &input : this->registered_inputs_) {
       input->handle_timeout();
@@ -135,6 +137,7 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
   uint16_t register_id = ((message[0] & 0x0F) << 8) | message[1];
 
   if (cmd == R48xx_CMD_DATA) {
+#ifdef USE_SENSOR
     int32_t value = (message[4] << 24) | (message[5] << 16) | (message[6] << 8) | message[7];
     float conv_value = 0;
     switch (register_id) {
@@ -215,6 +218,7 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
         // printf("Unknown parameter 0x%02X, 0x%04X\r\n",frame[1], value);
         break;
     }
+#endif // USE_SENSOR
     if (!incomplete) {
       this->lastUpdate_ = millis();
     }
@@ -234,11 +238,13 @@ void HuaweiR4850Component::on_frame(uint32_t can_id, bool rtr, std::vector<uint8
   }
 }
 
+#ifdef USE_SENSOR
 void HuaweiR4850Component::publish_sensor_state_(sensor::Sensor *sensor, float value) {
   if (sensor) {
     sensor->publish_state(value);
   }
 }
+#endif
 
 uint32_t HuaweiR4850Component::canid_pack_(uint8_t addr, uint8_t command, bool src_controller, bool incomplete) {
   uint32_t id = 0x1080007E; // proto ID, group mask, HW/SW id flag already set

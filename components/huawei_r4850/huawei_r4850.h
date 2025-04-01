@@ -1,8 +1,10 @@
 #pragma once
 
+#include "esphome/core/defines.h"
 #include "esphome/core/component.h"
+#ifdef USE_SENSOR
 #include "esphome/components/sensor/sensor.h"
-#include "esphome/components/number/number.h"
+#endif
 #include "esphome/components/canbus/canbus.h"
 
 namespace esphome {
@@ -70,6 +72,7 @@ class HuaweiR4850Component : public PollingComponent {
   float psu_max_current_;
   uint8_t psu_addr_;
 
+#ifdef USE_SENSOR
   sensor::Sensor *input_voltage_sensor_{nullptr};
   sensor::Sensor *input_frequency_sensor_{nullptr};
   sensor::Sensor *input_current_sensor_{nullptr};
@@ -81,12 +84,13 @@ class HuaweiR4850Component : public PollingComponent {
   sensor::Sensor *output_current_setpoint_sensor_{nullptr};
   sensor::Sensor *output_power_sensor_{nullptr};
   sensor::Sensor *output_temp_sensor_{nullptr};
+  void publish_sensor_state_(sensor::Sensor *sensor, float value);
+#endif
 
   std::vector<HuaweiR4850Input *> registered_inputs_{};
 
   void on_frame(uint32_t can_id, bool rtr, std::vector<uint8_t> &data);
 
-  void publish_sensor_state_(sensor::Sensor *sensor, float value);
   uint32_t canid_pack_(uint8_t addr, uint8_t command, bool src_controller, bool incomplete);
   void canid_unpack_(uint32_t canId, uint8_t *addr, uint8_t *command, bool *src_controller, bool *incomplete);
 };
