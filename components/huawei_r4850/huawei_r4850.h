@@ -14,6 +14,7 @@ class HuaweiR4850Input {
     virtual void handle_update(uint16_t register_id, std::vector<uint8_t> &data) = 0;
     virtual void handle_error(uint16_t register_id, std::vector<uint8_t> &data) = 0;
     virtual void handle_timeout() = 0;
+    virtual void resend_state() = 0;
 };
 
 class HuaweiR4850Component : public PollingComponent {
@@ -59,6 +60,9 @@ class HuaweiR4850Component : public PollingComponent {
   float get_psu_max_current() {
     return psu_max_current_;
   }
+
+  void set_resend_interval(uint32_t interval);
+  void resend_inputs();
 
  protected:
   canbus::Canbus *canbus;

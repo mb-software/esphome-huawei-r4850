@@ -63,6 +63,16 @@ void HuaweiR4850Component::setup() {
   automation->add_actions({lambdaaction});
 }
 
+void HuaweiR4850Component::set_resend_interval(uint32_t interval) {
+  this->set_interval("resend", interval, [this]() { this->resend_inputs(); });
+}
+
+void HuaweiR4850Component::resend_inputs() {
+  for (auto &input : this->registered_inputs_) {
+    input->resend_state();
+  }
+}
+
 void HuaweiR4850Component::update() {
   ESP_LOGD(TAG, "Sending request message");
   uint32_t canId = this->canid_pack_(this->psu_addr_, R48xx_CMD_DATA, true, false);

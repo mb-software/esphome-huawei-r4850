@@ -15,8 +15,18 @@ void HuaweiR4850Number::set_parent(HuaweiR4850Component *parent, uint16_t regist
   this->parent_ = parent;
   this->registerId_ = registerId;
 }
-
 void HuaweiR4850Number::control(float value) {
+  this->last_state_ = value;
+  this->send_state_(value);
+}
+
+void HuaweiR4850Number::resend_state() {
+  if (this->last_state_.has_value()) {
+    this->send_state_(this->last_state_.value());
+  }
+}
+
+void HuaweiR4850Number::send_state_(float value) {
   switch (this->registerId_)
   {
     case SET_VOLTAGE_FUNCTION:
