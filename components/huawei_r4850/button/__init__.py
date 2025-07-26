@@ -15,7 +15,7 @@ CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
             cv.GenerateID(CONF_HUAWEI_R4850_ID): cv.use_id(HuaweiR4850Component),
-            cv.Optional(CONF_SET_OFFLINE_VALUES): button.BUTTON_SCHEMA.extend(
+            cv.Optional(CONF_SET_OFFLINE_VALUES): button.button_schema(
                 {
                     cv.GenerateID(): cv.declare_id(HuaweiR4850Button),
                     cv.Optional(
