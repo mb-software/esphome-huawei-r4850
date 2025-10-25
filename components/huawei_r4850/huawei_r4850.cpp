@@ -38,7 +38,7 @@ void HuaweiR4850Component::setup() {
   canbus_canbustrigger->set_component_source(LOG_STR("canbus"));
   App.register_component(canbus_canbustrigger);
   automation = new Automation<std::vector<uint8_t>, uint32_t, bool>(canbus_canbustrigger);
-  auto cb = [=](std::vector<uint8_t> x, uint32_t can_id, bool remote_transmission_request) -> void {
+  auto cb = [=, this](std::vector<uint8_t> x, uint32_t can_id, bool remote_transmission_request) -> void {
     this->on_frame(can_id, remote_transmission_request, x);
   };
   lambdaaction = new LambdaAction<std::vector<uint8_t>, uint32_t, bool>(cb);
