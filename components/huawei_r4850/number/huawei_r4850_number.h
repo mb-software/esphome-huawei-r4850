@@ -13,11 +13,11 @@ class HuaweiR4850Number : public number::Number, public Component {
     this->functionCode_ = functionCode;
   };
 
+  void control(float value) override;
+
  protected:
   HuaweiR4850Component *parent_;
   int8_t functionCode_;
-
-  void control(float value) override;
 };
 
 }  // namespace huawei_r4850
